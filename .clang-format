@@ -1,0 +1,21 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+BreakBeforeBraces: Whitesmiths
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+ColumnLimit: 80
+AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign         
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+NamespaceIndentation: None
+AlwaysBreakAfterReturnType: None
+
+AllowShortLambdasOnASingleLine: None
+LambdaBodyIndentation: OuterScope
+
+BreakBeforeClosingBrackets: Always
+ContinuationIndentWidth: 8  
+
+
