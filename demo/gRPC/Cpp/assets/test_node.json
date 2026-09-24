@@ -1,0 +1,144 @@
+{
+    "dns": {
+        "independent_cache": true,
+        "rules": [
+            {
+                "outbound": "any",
+                "server": "dns-direct"
+            },
+            {
+                "domain": [
+                    "o.8.c.k.e.p.k.d.1.hk02-ae5.entry.v51124-6.qpon"
+                ],
+                "domain_keyword": [
+                ],
+                "domain_regex": [
+                ],
+                "domain_suffix": [
+                ],
+                "geosite": [
+                ],
+                "server": "dns-direct"
+            },
+            {
+                "query_type": [
+                    32,
+                    33
+                ],
+                "server": "dns-block"
+            },
+            {
+                "domain_suffix": ".lan",
+                "server": "dns-block"
+            }
+        ],
+        "servers": [
+            {
+                "address": "https://dns.google/dns-query",
+                "address_resolver": "dns-local",
+                "detour": "proxy",
+                "strategy": "",
+                "tag": "dns-remote"
+            },
+            {
+                "address": "https://doh.pub/dns-query",
+                "address_resolver": "dns-local",
+                "detour": "direct",
+                "strategy": "",
+                "tag": "dns-direct"
+            },
+            {
+                "address": "rcode://success",
+                "tag": "dns-block"
+            },
+            {
+                "address": "local",
+                "detour": "direct",
+                "tag": "dns-local"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "domain_strategy": "",
+            "listen": "127.0.0.1",
+            "listen_port": 2080,
+            "sniff": true,
+            "sniff_override_destination": false,
+            "tag": "mixed-in",
+            "type": "mixed"
+        }
+    ],
+    "log": {
+        "level": "info"
+    },
+    "outbounds": [
+        {
+            "domain_strategy": "",
+            "method": "aes-256-gcm",
+            "password": "7823e7c1-3e31-33aa-a535-c27d5064bc43",
+            "server": "o.8.c.k.e.p.k.d.1.hk02-ae5.entry.v51124-6.qpon",
+            "server_port": 14564,
+            "tag": "proxy",
+            "type": "shadowsocks",
+            "udp_over_tcp": false
+        },
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "bypass",
+            "type": "direct"
+        },
+        {
+            "tag": "block",
+            "type": "block"
+        },
+        {
+            "tag": "dns-out",
+            "type": "dns"
+        }
+    ],
+    "route": {
+        "auto_detect_interface": false,
+        "final": "proxy",
+        "geoip": {
+            "path": "/run/media/isaac/Data/Sync/Repository/GFW/nekoray/build/geoip.db"
+        },
+        "geosite": {
+            "path": "/run/media/isaac/Data/Sync/Repository/GFW/nekoray/build/geosite.db"
+        },
+        "rules": [
+            {
+                "outbound": "dns-out",
+                "protocol": "dns"
+            },
+            {
+                "network": "udp",
+                "outbound": "block",
+                "port": [
+                    135,
+                    137,
+                    138,
+                    139,
+                    5353
+                ]
+            },
+            {
+                "ip_cidr": [
+                    "224.0.0.0/3",
+                    "ff00::/8"
+                ],
+                "outbound": "block"
+            },
+            {
+                "outbound": "block",
+                "source_ip_cidr": [
+                    "224.0.0.0/3",
+                    "ff00::/8"
+                ]
+            }
+        ]
+    }
+}

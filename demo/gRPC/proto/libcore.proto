@@ -1,0 +1,121 @@
+//这个文件是 跨语言 的“合同”，Go 服务端必须实现这些方法，C++ 客户端按照这份合同调用
+syntax = "proto3";
+
+//生成的头文件会有 namespace libcore
+package libcore;
+//protobuf的Go代码生成选项，告诉protoc-gen-go生成的Go代码应放在 grpc_server/gen这个path下
+option go_package = "grpc_server/gen";
+
+//每个方法有请求消息和响应消息
+service LibcoreService {
+  rpc Exit(EmptyReq) returns (EmptyResp) {}
+  rpc Update(UpdateReq) returns (UpdateResp) {}
+  //
+  rpc Start(LoadConfigReq) returns (ErrorResp) {}
+  rpc Stop(EmptyReq) returns (ErrorResp) {}
+  //用于在不启动正式代理的情况下，测试某个配置的连通性/延迟/速度（URL Test、TCP Ping、Full Test）
+  rpc Test(TestReq) returns (TestResp) {}
+  //用于查询已启动代理的实时流量统计（某个outbound 的上行/下行字节数）,请求带 tag 和 direct，返回 traffic（int64）
+  rpc QueryStats(QueryStatsReq) returns (QueryStatsResp) {}
+  //定义了一个 gRPC 方法：GUI 向核心请求当前连接列表，目前 Go 服务端实现是空返回（TODO），响应结构预留了 nekoray_connections_json 字段
+  rpc ListConnections(EmptyReq) returns (ListConnectionsResp) {}
+}
+
+
+message EmptyReq {}
+
+message EmptyResp {}
+
+message ErrorResp {
+  string error = 1;
+}
+
+/*
+当使用 protoc 编译器处理 .proto 文件时，会为每个消息字段自动生成对应的访问方法：
+Getter: const std::string& core_config()
+Setter: void set_core_config(const std::string& value)
+移动语义 Setter: void set_core_config(std::string&& value)
+C 字符串 Setter: void set_core_config(const char* value)
+对于 string core_config = 1; 字段，protoc 会生成 set_core_config 函数，用于设置该字段的值。
+*/
+//生成的头文件会有LoadConfigReq这个类，是 google::protobuf::Message 的子类
+message LoadConfigReq {
+  string core_config = 1;
+  bool enable_nekoray_connections = 2;
+  //repeated 是 Protocol Buffers 中的一个关键字，用于标记字段可以包含多个值，相当于数组或列表
+  repeated string stats_outbounds = 3;
+}
+
+enum TestMode {
+  //TCP 握手延迟测试
+  TcpPing = 0;
+  //测 RTT 延迟
+  UrlTest = 1;
+  //综合测试（延迟、UDP 延迟、下载速度、入口/出口 IP 等）
+  FullTest = 2;
+}
+
+//字段编号 = 字段在二进制协议里的身份证,不是按顺序排的,编号可以跳跃，只要唯一即可
+message TestReq {
+  TestMode mode = 1;
+  int32 timeout = 6;
+  // TcpPing
+  string address = 2;
+  // UrlTest
+  LoadConfigReq config = 3;
+  string inbound = 4;
+  string url = 5;
+  // FullTest
+  string in_address = 7;
+  bool full_latency = 8;
+  bool full_speed = 9;
+  string full_speed_url = 13;
+  int32 full_speed_timeout = 14;
+  bool full_in_out = 10;
+  bool full_udp_latency = 12;
+  //
+  bool full_nat = 11 [deprecated = true];
+}
+
+message TestResp {
+  //错误信息，空表示成功
+  string error = 1;
+  //延迟结果（毫秒），0 通常表示未测出/失败
+  int32 ms = 2;
+  //Full Test 模式下的综合报告文本（如 Latency / Speed / In / Out IP 等）
+  string full_report = 3;
+}
+
+message QueryStatsReq{
+  //outbound 的 tag 名称
+  string tag = 1;
+  //方向，通常是 uplink 或 downlink
+  string direct = 2;
+}
+
+message QueryStatsResp{
+  int64 traffic = 1;
+}
+
+enum UpdateAction {
+  Check = 0;
+  Download = 1;
+}
+
+message UpdateReq {
+  UpdateAction action = 1;
+  bool check_pre_release = 2;
+}
+
+message UpdateResp {
+  string error = 1;
+  string assets_name = 2;
+  string download_url = 3;
+  string release_url = 4;
+  string release_note = 5;
+  bool is_pre_release = 6;
+}
+
+message ListConnectionsResp {
+  string nekoray_connections_json = 1;
+}
