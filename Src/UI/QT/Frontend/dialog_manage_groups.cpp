@@ -4,8 +4,8 @@
 //#include "db/Database.hpp"
 //#include "sub/GroupUpdater.hpp"
 //#include "main/GuiUtils.hpp"
-#include "ui/widget/GroupItem.h"
-#include "ui/edit/dialog_edit_group.h"
+#include "Frontend/widget/GroupItem.h"
+#include "Frontend/edit/dialog_edit_group.h"
 
 #include <QInputDialog>
 #include <QListWidgetItem>

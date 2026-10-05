@@ -924,7 +924,7 @@
   <customwidget>
    <class>MyTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>ui/widget/MyTableWidget.h</header>
+   <header>Frontend/widget/MyTableWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

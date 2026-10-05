@@ -739,7 +739,7 @@
   <customwidget>
    <class>MyLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>ui/widget/MyLineEdit.h</header>
+   <header>Frontend/widget/MyLineEdit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -3,8 +3,8 @@
 
 #include "3rdparty/qv2ray/v2/ui/widgets/editors/w_JsonEditor.hpp"
 //#include "fmt/Preset.hpp"
-#include "ui/ThemeManager.hpp"
-#include "ui/Icon.hpp"
+#include "Frontend/ThemeManager.hpp"
+#include "Frontend/Icon.hpp"
 //#include "main/GuiUtils.hpp"
 
 #include <QStyleFactory>

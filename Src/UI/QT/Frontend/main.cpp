@@ -6,10 +6,11 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 #include <QStandardPaths>
-#include <QThread>
 #include <QTranslator>
 
-#include "ui/mainwindow.h"
+#include "CommonInclude/TypeDefine.h"
+
+#include "mainwindow.h"
 
 void signal_handler(int signum)
     {
@@ -53,7 +54,6 @@ int main(int argc, char *argv[])
     {
     QApplication app(argc, argv);
 
-    // icon for no theme
     if (QIcon::themeName().isEmpty())
         {
         QIcon::setThemeName("breeze");
@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
     // signal(SIGINT, signal_handler);
 
 
-    UI_InitMainWindow();
+    MainWindow mainwindow;
+    mainwindow.show();
     return QApplication::exec();
     }

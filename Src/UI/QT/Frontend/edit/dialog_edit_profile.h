@@ -5,7 +5,7 @@
 //#include "db/Database.hpp"
 #include "profile_editor.h"
 
-#include "ui/widget/FloatCheckBox.h"
+#include "Frontend/widget/FloatCheckBox.h"
 
 namespace Ui {
     class DialogEditProfile;

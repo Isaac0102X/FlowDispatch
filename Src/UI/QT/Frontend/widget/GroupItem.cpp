@@ -1,7 +1,7 @@
 #include "GroupItem.h"
 #include "ui_GroupItem.h"
 
-#include "ui/edit/dialog_edit_group.h"
+#include "Frontend/edit/dialog_edit_group.h"
 
 #include <QMessageBox>
 

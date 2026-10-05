@@ -90,7 +90,10 @@ protected:
         int row_src, row_dst;
         row_src = this->currentRow();                        // 原行号 可加if
         auto id_src = row2Id[row_src];                       // id_src
-        QTableWidgetItem *item = this->itemAt(event->pos()); // 获取落点的item
+        //获取落点的item
+        //QTableWidgetItem *item = this->itemAt(event->pos());
+        //qt6的写法
+        QTableWidgetItem *item = this->itemAt(event->position().toPoint());
         if (item != nullptr) {
             // 判断是否为空
             row_dst = item->row(); // 不为空 获取其行号
