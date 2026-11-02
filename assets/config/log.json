@@ -1,0 +1,9 @@
+{
+  "ui_enabled": true,
+  "ui_level": "info",
+  "file_enabled": true,
+  "file_level": "debug",
+  "file_path": "logs/app.log",
+  "file_max_size_mb": 5,
+  "file_rotate_count": 3
+}
