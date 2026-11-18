@@ -7,8 +7,7 @@
 #include <fstream>
 #include <type_traits>
 
-namespace app::adapters
-    {
+namespace app::adapters{
 
 using json = nlohmann::json;
 using namespace app::infra::config;
@@ -110,4 +109,4 @@ void JsonConfigStore::save(std::string_view section, const FieldMap &fields)
         ofs << fields_to_json(fields).dump(2) << "\n";
     }
 
-    } // namespace app::adapters
+} // namespace app::adapters

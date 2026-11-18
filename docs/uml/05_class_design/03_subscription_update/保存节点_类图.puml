@@ -1,0 +1,60 @@
+@startuml DomainPersistenceMapping
+allowmixing
+title Domain Model / Repository / File System
+
+package "Domain" {
+    class Node {
+        NodeId id
+        Optional~SubscriptionId~ subscriptionId
+        address
+        port
+        ProtocolConfig
+    }
+
+    class Subscription {
+        SubscriptionId id
+        name
+        url
+        lastUpdatedAt
+    }
+}
+
+package "Repository" {
+
+    class NodeRepository {
+        vector~Node~ nodes_
+        unordered_map~NodeId, size_t~ indexById_
+    }
+
+    class SubscriptionRepository {
+        subscriptions_
+    }
+}
+
+database "File System" as FS
+
+folder "data/nodes/" as NodesDir {
+    folder "independent/" as Independent
+    folder "sub-&lt;subscription-id&gt;/" as SubscriptionDir
+}
+
+NodeRepository *-- Node
+SubscriptionRepository *-- Subscription
+
+NodeRepository ..> NodesDir
+SubscriptionRepository ..> FS
+
+note right of Independent
+Node.subscriptionId = nullopt
+end note
+
+note right of SubscriptionDir
+Directory location determines
+Subscription membership.
+
+subscriptionId is reconstructed
+at runtime and is not stored
+in Node JSON in V1.
+end note
+
+@enduml

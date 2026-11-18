@@ -1,0 +1,40 @@
+@startuml StartupAndDisplayNodes
+title Startup - Load Subscriptions and Nodes
+
+participant Application
+participant SubscriptionRepository as SubRepo
+participant NodeRepository as NodeRepo
+participant UI
+
+Application -> SubRepo : loadAll()
+SubRepo --> Application : subscriptions
+
+Application -> NodeRepo : loadAll()
+
+NodeRepo -> NodeRepo : scan independent/
+NodeRepo -> NodeRepo : load independent Nodes
+NodeRepo -> NodeRepo : subscriptionId = null
+
+NodeRepo -> NodeRepo : scan sub-A/
+NodeRepo -> NodeRepo : load Nodes
+NodeRepo -> NodeRepo : subscriptionId = A
+
+NodeRepo -> NodeRepo : scan sub-B/
+NodeRepo -> NodeRepo : load Nodes
+NodeRepo -> NodeRepo : subscriptionId = B
+
+NodeRepo --> Application : loaded
+
+Application -> UI : showSubscriptions(subscriptions)
+
+loop each subscription
+    UI -> NodeRepo : findIdsBySubscription(subscription.id)
+    NodeRepo --> UI : NodeIds
+    UI -> UI : create/update subscription tab
+end
+
+UI -> NodeRepo : findIndependentNodeIds()
+NodeRepo --> UI : NodeIds
+UI -> UI : create Independent tab
+
+@enduml

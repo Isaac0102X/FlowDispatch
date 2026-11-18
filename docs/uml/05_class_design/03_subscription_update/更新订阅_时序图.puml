@@ -1,0 +1,71 @@
+@startuml UpdateSubscription_V1_Frozen
+title Update Subscription - V1
+
+actor User
+participant UI
+participant NodeController as Controller
+participant SubscriptionRepository as SubRepo
+participant SubscriptionFetcher as Fetcher
+participant NodeLinkParser as Parser
+participant ProxyCore as Core
+participant NodeRepository as NodeRepo
+
+User -> UI : Update subscription
+UI -> Controller : updateSubscription(subId, fetchMode)
+
+Controller -> SubRepo : findById(subId)
+SubRepo --> Controller : Subscription
+
+Controller -> Fetcher : fetch(subscription, fetchMode)
+
+alt fetch failed
+    Fetcher --> Controller : failure
+    Controller --> UI : updateFailed
+else fetch succeeded
+
+    Fetcher --> Controller : RawData
+
+    Controller -> Parser : parse(rawData)
+
+    alt parse failed
+        Parser --> Controller : failure
+        Controller --> UI : updateFailed
+    else parse succeeded
+
+        Parser --> Controller : newNodes
+
+        Controller -> Core : getActiveNodeId()
+        Core --> Controller : activeNodeId / null
+
+        alt active node belongs to this subscription
+
+            Controller -> NodeRepo : findById(activeNodeId)
+            NodeRepo --> Controller : activeNode
+
+            Controller -> Controller : compare identityKey()
+
+            alt active node matched
+
+                Controller -> Controller : assign existing NodeId to matched newNode
+
+            else active node disappeared
+
+                Controller -> Controller : protectedNodeId = activeNodeId
+
+            end
+        end
+
+        Controller -> NodeRepo : replaceSubscriptionNodes(subId, newNodes, protectedNodeId)
+
+        NodeRepo --> Controller : success
+
+        Controller -> SubRepo : save(Sub.markUpdated(now))
+
+        SubRepo --> Controller : success
+
+        Controller --> UI : updateSucceeded
+
+    end
+end
+
+@enduml

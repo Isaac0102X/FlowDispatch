@@ -1,0 +1,125 @@
+@startuml NodeSubscriptionFinalModel
+title Node / Subscription / Repository - V1
+
+package "Domain" {
+
+    class Node {
+        - id : NodeId
+        - subscriptionId : optional<SubscriptionId>
+
+        - address : string
+        - port : uint16
+
+        - protocolConfig : ProtocolConfig
+
+        + id() : NodeId
+        + subscriptionId() : optional<SubscriptionId>
+        + identityKey() : NodeIdentityKey
+        + detachFromSubscription()
+        + isValidForCore()
+    }
+
+    class Subscription {
+        - id : SubscriptionId
+        - name : string
+        - url : string
+        - lastUpdatedAt : DateTime
+
+        + markUpdated(at : DateTime)
+    }
+
+    struct ProtocolConfig {
+        protocol : string
+        fields : JsonObject
+    }
+
+    struct NodeIdentityKey {
+        protocol : string
+        ...
+    }
+
+    class ProxyCore {
+        - activeNodeId : optional<NodeId>
+        + getActiveNodeId()
+    }
+
+    Node "0..*" --> "0..1" Subscription : subscriptionId
+
+    Node ..> ProtocolConfig
+    Node ..> NodeIdentityKey
+}
+
+package "Infrastructure" {
+
+    class NodeRepository {
+        - nodes_ : vector<Node>
+        - indexById_
+
+        + loadAll()
+        + findById()
+        + findIdsBySubscription()
+        + findIndependentNodeIds()
+        + add()
+        + save()
+        + replaceSubscriptionNodes()
+    }
+
+    class SubscriptionRepository {
+        - subscriptions_
+
+        + loadAll()
+        + findById()
+        + save()
+    }
+
+    class SubscriptionFetcher {
+        + fetch(subscription, fetchMode)
+    }
+
+    class NodeLinkParser {
+        + parse(rawData)
+    }
+}
+
+package "Application" {
+
+    class NodeController {
+        + updateSubscription(subscriptionId, fetchMode)
+    }
+}
+
+NodeRepository *-- "0..*" Node
+SubscriptionRepository *-- "0..*" Subscription
+
+NodeController ..> SubscriptionRepository
+NodeController ..> NodeRepository
+NodeController ..> SubscriptionFetcher
+NodeController ..> NodeLinkParser
+NodeController ..> ProxyCore
+
+SubscriptionFetcher ..> Subscription
+NodeLinkParser ..> Node
+ProxyCore ..> Node
+
+note right of Node
+Node itself is concrete/value semantic.
+
+ProtocolConfig is value data.
+No variant / virtual polymorphism here.
+end note
+
+note right of Subscription
+No vector<NodeId>.
+
+Membership is represented by
+Node.subscriptionId.
+end note
+
+note bottom of NodeRepository
+V1: clear-and-rebuild.
+
+Future: reconcileNodes()
+only when real requirements demand it.
+end note
+
+@enduml

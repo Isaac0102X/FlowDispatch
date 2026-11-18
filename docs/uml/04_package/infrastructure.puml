@@ -1,0 +1,80 @@
+@startuml
+title CommonArchitecture - UML Package Diagram
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
+
+package "应用程序" as Application {
+    package "main.cpp\n可执行程序" as Main
+    package "bootstrap\napp_bootstrap\nBootstrapper" as Bootstrap
+}
+
+package "UI 层\napp_ui" as UI {
+    package "MainWindow" as MainWindow
+    package "ConfigEditDialog" as ConfigDialog
+    package "LogSettingsDialog" as LogDialog
+}
+
+package "Core 层\napp_core" as Core {
+    package "ConfigRegistry" as ConfigRegistry
+    package "AppSettingsSection" as AppSettings
+    package "LogConfigSection" as LogConfig
+}
+
+package "Business 层\napp_business" as Business {
+    package "node_management" as NodeManagement
+    package "scheduled_tasks" as ScheduledTasks
+}
+
+package "Infrastructure 层\napp_infra" as Infra {
+    package "config\nIConfigSection / IConfigStore" as ConfigAbstractions
+    package "logging\nLog / ILogger" as LoggingAbstractions
+}
+
+package "Adapters 层" as Adapters {
+    package "JSON 配置适配器\napp_adapter_json\nJsonConfigStore" as JsonAdapter
+    package "日志适配器\napp_adapter_logging\nSpdlogLogger / SinkFactory" as LoggingAdapter
+    package "Qt 日志桥接\napp_adapter_qt\nQtLogBridge" as QtAdapter
+}
+
+package "第三方库" as ThirdParty {
+    package "Qt6 Widgets" as QtWidgets
+    package "Qt6 Core" as QtCore
+    package "nlohmann_json" as Nlohmann
+    package "spdlog (header-only)" as Spdlog
+    package "fmt" as Fmt
+}
+
+Main ..> Bootstrap : 启动
+Main ..> QtWidgets : QApplication
+
+Bootstrap ..> UI : 创建窗口与对话框
+Bootstrap ..> Core : 创建配置段与注册中心
+Bootstrap ..> Business : 创建业务对象
+Bootstrap ..> JsonAdapter : 创建配置存储
+Bootstrap ..> LoggingAdapter : 创建日志实现与 sinks
+Bootstrap ..> QtAdapter : 创建日志桥接
+Bootstrap ..> Infra : 使用日志门面
+Bootstrap ..> QtWidgets : 启动事件循环
+
+UI ..> Core : 使用应用配置 / 上下文
+UI ..> Business : 调用业务控制器与配置段
+UI ..> Infra : 使用配置接口与日志门面
+UI ..> QtAdapter : 接收日志信号
+UI ..> QtWidgets : 窗口、控件与对话框
+
+Core ..> Infra : 实现配置抽象
+Business ..> Infra : 实现配置抽象 / 使用日志门面
+
+JsonAdapter ..> Infra : 实现 IConfigStore
+JsonAdapter ..> Nlohmann : JSON 序列化
+
+LoggingAdapter ..> Infra : 实现 ILogger / 使用日志记录
+LoggingAdapter ..> Spdlog : 日志后端
+Spdlog ..> Fmt : 格式化依赖
+
+QtAdapter ..> Infra : 使用日志记录类型
+QtAdapter ..> QtCore : QObject / 信号槽
+
+@enduml

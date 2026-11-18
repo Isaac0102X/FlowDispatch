@@ -1,0 +1,113 @@
+@startuml NekorayDomainModel
+skinparam classAttributeIconSize 0
+hide circle
+hide methods
+
+abstract class Node {
+  name
+  address
+  port
+  latencyMs
+  isActive
+  sourceType : SourceType
+}
+
+enum SourceType {
+  ManualPaste
+  QRCodeScan
+  Subscription
+}
+
+class VmessNode {
+  UUID
+  alterId
+  encryption
+}
+
+class VlessNode {
+  UUID
+  flow
+}
+
+class ShadowsocksNode {
+  password
+  encryption
+}
+
+class TrojanNode {
+  password
+}
+
+Node <|-- VmessNode
+Node <|-- VlessNode
+Node <|-- ShadowsocksNode
+Node <|-- TrojanNode
+Node ..> SourceType : uses
+
+class Subscription {
+  name
+  url
+  lastUpdatedAt
+  updateViaProxy
+  allowProxyFallback
+}
+
+Subscription "1" o-- "0..*" Node : contains
+
+class ScheduledTask {
+  type
+  period
+  enabled
+  allowProxyFallback
+}
+
+ScheduledTask "0..*" --> "0..1" Subscription : triggers
+
+class RoutingRule {
+  match
+  priority
+  target
+}
+
+RoutingRule "0..*" --> "0..1" Node : exit node
+
+class ProxyCore {
+  status
+  listenPort
+}
+
+ProxyCore "1" --> "1" Node : active node
+ProxyCore "1" --> "0..*" RoutingRule : loaded rules
+
+abstract class RunMode {
+  effectiveState
+}
+
+class NormalMode
+class SystemProxyMode {
+  originalProxyBackup
+  targetPort
+}
+class TunMode {
+  adapterName
+  originalRoutingSnapshot
+  elevated
+}
+
+RunMode <|-- NormalMode
+RunMode <|-- SystemProxyMode
+RunMode <|-- TunMode
+
+ProxyCore "1" *-- "1" RunMode : current mode
+
+class ConnectionLog {
+  domain
+  matchedRule
+  node
+  rtt
+  timestamp
+}
+
+ProxyCore "1" *-- "0..*" ConnectionLog : produces
+
+@enduml
