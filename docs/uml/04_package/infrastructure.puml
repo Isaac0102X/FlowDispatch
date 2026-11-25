@@ -16,7 +16,7 @@ package "UI 层\napp_ui" as UI {
     package "LogSettingsDialog" as LogDialog
 }
 
-package "Core 层\napp_core" as Core {
+package "配置管理层\napp_cfg_management" as ConfigManagement {
     package "ConfigRegistry" as ConfigRegistry
     package "AppSettingsSection" as AppSettings
     package "LogConfigSection" as LogConfig
@@ -50,7 +50,7 @@ Main ..> Bootstrap : 启动
 Main ..> QtWidgets : QApplication
 
 Bootstrap ..> UI : 创建窗口与对话框
-Bootstrap ..> Core : 创建配置段与注册中心
+Bootstrap ..> ConfigManagement : 创建配置段与注册中心
 Bootstrap ..> Business : 创建业务对象
 Bootstrap ..> JsonAdapter : 创建配置存储
 Bootstrap ..> LoggingAdapter : 创建日志实现与 sinks
@@ -58,13 +58,13 @@ Bootstrap ..> QtAdapter : 创建日志桥接
 Bootstrap ..> Infra : 使用日志门面
 Bootstrap ..> QtWidgets : 启动事件循环
 
-UI ..> Core : 使用应用配置 / 上下文
+UI ..> ConfigManagement : 使用应用配置 / 上下文
 UI ..> Business : 调用业务控制器与配置段
 UI ..> Infra : 使用配置接口与日志门面
 UI ..> QtAdapter : 接收日志信号
 UI ..> QtWidgets : 窗口、控件与对话框
 
-Core ..> Infra : 实现配置抽象
+ConfigManagement ..> Infra : 实现配置抽象
 Business ..> Infra : 实现配置抽象 / 使用日志门面
 
 JsonAdapter ..> Infra : 实现 IConfigStore

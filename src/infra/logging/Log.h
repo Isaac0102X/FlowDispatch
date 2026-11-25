@@ -111,41 +111,7 @@ public:
     static void
     critical(std::string_view msg,
              const std::source_location &loc = std::source_location::current());
-/*
-    当前 source_location::current() 写在模板函数体里，因此记录的位置会落在 Log.h 中，而不是调用处
-    这里有待删掉
-    // C++20 std::format：业务只写 Log::info("x={}", v)，编译期校验格式串
-    template <typename... Args>
-    static void debug(std::format_string<Args...> fmt, Args &&...args)
-        {
-        logv(Level::debug, std::source_location::current(), fmt,
-             std::forward<Args>(args)...);
-        }
-    template <typename... Args>
-    static void info(std::format_string<Args...> fmt, Args &&...args)
-        {
-        logv(Level::info, std::source_location::current(), fmt,
-             std::forward<Args>(args)...);
-        }
-    template <typename... Args>
-    static void warn(std::format_string<Args...> fmt, Args &&...args)
-        {
-        logv(Level::warn, std::source_location::current(), fmt,
-             std::forward<Args>(args)...);
-        }
-    template <typename... Args>
-    static void error(std::format_string<Args...> fmt, Args &&...args)
-        {
-        logv(Level::error, std::source_location::current(), fmt,
-             std::forward<Args>(args)...);
-        }
-    template <typename... Args>
-    static void critical(std::format_string<Args...> fmt, Args &&...args)
-        {
-        logv(Level::critical, std::source_location::current(), fmt,
-             std::forward<Args>(args)...);
-        }
-*/
+
     // 显式携带调用点（配合下方宏使用，能拿到业务真实调用行；
     // 便捷 info(fmt, args...) 的调用点会落在 Log.h，因为 current()
     // 在模板内求值）。
@@ -157,12 +123,6 @@ public:
         }
 
 private:
-    template <typename... Args>
-    static void logv(Level lv, const std::source_location &loc,
-                     std::format_string<Args...> fmt, Args &&...args)
-        {
-        get().log(lv, std::format(fmt, std::forward<Args>(args)...), loc);
-        }
     static std::shared_ptr<ILogger> &impl();
     };
 

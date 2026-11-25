@@ -3,7 +3,8 @@
 
 #include <QDialog>
 
-#include "core/LogConfigSection.h"
+#include "cfg_management/BasicSettings/LogConfigSection.h"
+#include "cfg_management/BasicSettings/CommonSection.h"
 #include "infra/config/IConfigStore.h"
 
 namespace Ui {
@@ -14,7 +15,8 @@ class DialogBasicSettings : public QDialog {
     Q_OBJECT
 
 public:
-    explicit DialogBasicSettings(app::core::LogConfigSection &section,
+    explicit DialogBasicSettings(app::cfg_management::LogConfigSection &section,
+                                 app::cfg_management::BasicSettings::CommonSection &common,
                                  app::infra::config::IConfigStore &store,
                                  QWidget *parent = nullptr);
 
@@ -26,10 +28,12 @@ public slots:
 
 private:
     app::infra::config::FieldMap collect() const;
+    void load_common_settings();
     void load_log_settings();
 
     Ui::DialogBasicSettings *ui;
-    app::core::LogConfigSection &section_;
+    app::cfg_management::LogConfigSection &section_;
+    app::cfg_management::BasicSettings::CommonSection &common_;
     app::infra::config::IConfigStore &store_;
 
 

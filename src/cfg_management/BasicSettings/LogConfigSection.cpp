@@ -1,8 +1,8 @@
-#include "core/LogConfigSection.h"
+#include "LogConfigSection.h"
 
 #include "infra/logging/Log.h"
 
-namespace app::core{
+namespace app::cfg_management{
 
 using namespace app::infra::config;
 
@@ -18,6 +18,9 @@ void LogConfigSection::load_from(const IConfigStore &store)
         field_or(m, "file_max_size_mb", data_.file_max_size_mb);
     data_.file_rotate_count =
         field_or(m, "file_rotate_count", data_.file_rotate_count);
+    data_.flush_level = field_or(m, "flush_level", data_.flush_level);
+    data_.flush_every_sec =
+        field_or(m, "flush_every_sec", data_.flush_every_sec);
     }
 
 void LogConfigSection::save_to(IConfigStore &store) const
@@ -30,6 +33,8 @@ void LogConfigSection::save_to(IConfigStore &store) const
     m["file_path"] = data_.file_path;
     m["file_max_size_mb"] = data_.file_max_size_mb;
     m["file_rotate_count"] = data_.file_rotate_count;
+    m["flush_level"] = data_.flush_level;
+    m["flush_every_sec"] = data_.flush_every_sec;
     store.save(id(), m);
     }
 
@@ -43,6 +48,8 @@ std::vector<UiField> LogConfigSection::ui_fields() const
         {"file_path", "文件路径", data_.file_path},
         {"file_max_size_mb", "单文件大小(MB)", data_.file_max_size_mb},
         {"file_rotate_count", "保留文件数", data_.file_rotate_count},
+        {"flush_level", "刷新级别", data_.flush_level},
+        {"flush_every_sec", "周期刷新(秒)", data_.flush_every_sec},
     };
     }
 
@@ -57,9 +64,12 @@ void LogConfigSection::apply(const FieldMap &edits, IConfigStore &store)
         field_or(edits, "file_max_size_mb", data_.file_max_size_mb);
     data_.file_rotate_count =
         field_or(edits, "file_rotate_count", data_.file_rotate_count);
+    data_.flush_level = field_or(edits, "flush_level", data_.flush_level);
+    data_.flush_every_sec =
+        field_or(edits, "flush_every_sec", data_.flush_every_sec);
     save_to(store);
     APP_LOG_INFO("Log settings updated");
     notify_change("日志设置已更新");
     }
 
-} // namespace app::core
+} // namespace app::cfg_management

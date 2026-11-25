@@ -1,6 +1,6 @@
+
 add_library(app_bootstrap STATIC
     Bootstrapper.cpp
-    Bootstrapper.h
 )
 
 target_include_directories(app_bootstrap PUBLIC
@@ -12,7 +12,7 @@ target_link_libraries(app_bootstrap PRIVATE
     app_adapter_logging
     app_adapter_qt
     app_business
-    app_core
+    app_cfg_management
     app_infra
     app_ui
     Qt6::Widgets

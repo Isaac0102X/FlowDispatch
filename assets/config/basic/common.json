@@ -1,0 +1,16 @@
+{
+    "inbound_address": "127.0.0.1",
+    "inbound_auth": {
+        "username": "",
+        "password": ""
+    },
+    "custom_inbound": "{\"inbounds\": []}",
+    "inbound_socks_port": 2080,
+    "test_latency_url": "http://cp.cloudflare.com/",
+    "test_concurrent": 5,
+    "test_download_url": "http://cachefly.cachefly.net/10mb.test",
+    "test_download_timeout": 30,
+    "check_include_pre": false,
+    "old_share_link_format": false,
+    "system_proxy_format": "env",
+}

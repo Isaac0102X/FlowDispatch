@@ -10,13 +10,11 @@
 #include "business/node_management/NodeConfigSection.h"
 #include "business/scheduled_tasks/ScheduledTasksController.h"
 #include "business/scheduled_tasks/TaskConfigSection.h"
-#include "core/AppContext.h"
-#include "core/AppSettingsSection.h"
-#include "core/ConfigRegistry.h"
-#include "core/LogConfigSection.h"
+#include "AppContext.h"
+#include "cfg_management/ConfigRegistry.h"
+#include "cfg_management/BasicSettings/LogConfigSection.h"
+#include "cfg_management/BasicSettings/CommonSection.h"
 #include "infra/logging/Log.h"
-//#include "ui/ConfigEditDialog.h"
-//#include "ui/LogSettingsDialog.h"
 #include "../ui/mainwindow.h"
 
 #include <QApplication>
@@ -24,30 +22,70 @@
 
 #include <filesystem>
 #include <memory>
+#include <cassert>
 
-namespace app::bootstrap{
+namespace app::assembly{
 
 using namespace app::infra::logging;
-using namespace app::core;
+using namespace app::cfg_management;
+
+namespace{
+
+std::filesystem::path resolve_config_dir()
+    {
+    if (const char *env = std::getenv("APP_CONFIG_DIR");
+        env != nullptr && *env != '\0')
+        {
+        return std::filesystem::path(env);
+        }
+    return std::filesystem::path(
+               QCoreApplication::applicationDirPath().toStdString()) /
+           "Config";
+    }
+
+// 配置里的相对路径（如日志 "logs/app.log"）统一解析到 exe 目录，
+// 保证绿色版的日志、配置文件都跟着程序走，而不是跟着当前工作目录跑。
+// 返回空 path 表示失败，调用方决定怎么处理
+std::filesystem::path resolve_runtime_path(const std::string& configured)
+    {
+    if (configured.empty())
+        return {};
+
+    std::filesystem::path p(configured);
+    if (!p.is_absolute())
+        p = std::filesystem::path(
+                QCoreApplication::applicationDirPath().toStdString()) / p;
+
+    std::error_code ec;
+    auto r = std::filesystem::weakly_canonical(p, ec);
+    return ec ? std::filesystem::path{} : r;
+    }
+
+} // namespace
 
 int Bootstrapper::run()
     {
-    // ---- 配置存储：Config 目录下按子文件夹/文件分门别类（见 CMakeLists
-    // 复制规则）----
-    auto store = std::make_shared<app::adapters::JsonConfigStore>("Config");
+    // 配置存储：<exe目录>/Config；模板(*.default.json)与用户配置(*.json)分离
+    // ---- 布局与升级语义见 adapters/json/JsonConfigStore.h 顶部说明。
+    const auto config_dir = resolve_config_dir();
+    auto store = std::make_shared<::app::adapters::JsonConfigStore>(config_dir);
 
     // ---- 各业务/系统配置段自注册（开闭原则：新增业务=新增段+注册一行）----
-    AppSettingsSection app;
     LogConfigSection log;
-    app::business::node_management::NodeConfigSection node;
-    app::business::scheduled_tasks::TaskConfigSection task;
+    ::app::business::node_management::NodeConfigSection node;
+    ::app::business::scheduled_tasks::TaskConfigSection task;
+    app::cfg_management::BasicSettings::CommonSection common;
 
     ConfigRegistry registry;
-    registry.register_section(app);
     registry.register_section(log);
     registry.register_section(node);
     registry.register_section(task);
-    registry.load_all(*store); // json -> 各段强类型
+    registry.register_section(common);
+    registry.load_all(*store); // 模板 + 用户配置按字段合并 -> 各段强类型
+
+    // 首次运行：为还没有用户配置的段生成一份完整、可编辑的 *.json；
+    // 已存在的用户配置一律不覆盖（绿色版解压覆盖升级不会丢用户数据）。
+    registry.save_missing(*store);
 
     // ---- 日志桥接（Qt 信号槽把任意线程的日志投递到 UI 线程）----
     app::adapters::qt::QtLogBridge log_bridge;
@@ -60,15 +98,23 @@ int Bootstrapper::run()
         spec.ui_level = log.data().ui_level;
         spec.file_enabled = log.data().file_enabled;
         spec.file_level = log.data().file_level;
-        spec.file_path = log.data().file_path;
+        // 日志相对路径统一相对 exe 目录（绿色版所有落盘产物都跟着程序走）
+        spec.file_path = resolve_runtime_path(log.data().file_path);
+        assert(!spec.file_path.empty());
+
         spec.file_max_size_mb = log.data().file_max_size_mb;
         spec.file_rotate_count = log.data().file_rotate_count;
+
+        spec.flush_level = log.data().flush_level;
+        spec.flush_every_sec = log.data().flush_every_sec;
+
         std::error_code ec;
         std::filesystem::create_directories(
             std::filesystem::path(spec.file_path).parent_path(), ec);
-        Log::reconfigure(std::make_shared<app::adapters::SpdlogLogger>(
-            app::adapters::SinkFactory::create(spec, log_bridge.callback())));
+        Log::reconfigure(std::make_shared<::app::adapters::SpdlogLogger>(
+            ::app::adapters::SinkFactory::create(spec, log_bridge.callback())));
         };
+
     reload_logging();
 
     // ---- 业务 Facade：注入 MainWindow ----
@@ -78,11 +124,11 @@ int Bootstrapper::run()
     AppContext ctx;
 
     ctx.store = store.get();
-    ctx.app = &app;
     ctx.log = &log;
     ctx.node = &node;
     ctx.task = &task;
     ctx.tasks = &tasks;
+    ctx.common = &common;
     ctx.log_bridge = &log_bridge;
     ctx.reload_logging = reload_logging;
 
@@ -98,4 +144,4 @@ int Bootstrapper::run()
     return rc;
     }
 
-} // namespace app::bootstrap
+} // namespace app::assembly

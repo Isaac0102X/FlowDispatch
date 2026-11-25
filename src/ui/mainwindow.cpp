@@ -7,6 +7,7 @@
 #include "infra/logging/Log.h"
 
 #include "dialog_basic_settings.h"
+#include "dialog_manage_groups.h"
 
 #include <QLabel>
 #include <QMessageBox>
@@ -24,7 +25,7 @@ void LocationDebug(const QString &which_widget)
 
 namespace app::ui {
 
-MainWindow::MainWindow(app::core::AppContext &ctx, QWidget *parent)
+MainWindow::MainWindow(app::cfg_management::AppContext &ctx, QWidget *parent)
     : QMainWindow(parent), ui_(new Ui::MainWindow), ctx_(ctx)
     {
     //themeManager->ApplyTheme(NekoGui::dataStore->theme);
@@ -235,7 +236,7 @@ void MainWindow::show_group(int gid)
 
 void MainWindow::on_menu_basic_settings_triggered()
     {
-    DialogBasicSettings dlg(*ctx_.log, *ctx_.store, this);
+    DialogBasicSettings dlg(*ctx_.log, *ctx_.common, *ctx_.store, this);
     if (dlg.exec() == QDialog::Accepted)
         {
         ctx_.reload_logging();
@@ -246,6 +247,11 @@ void MainWindow::on_menu_basic_settings_triggered()
 void MainWindow::on_menu_manage_groups_triggered()
     {
     //Deletable USE_DIALOG(DialogManageGroups)
+    DialogManageGroups dlg(this);
+    if (dlg.exec() == QDialog::Accepted)
+        {
+        //refresh_groups();
+        }
     }
 
 void MainWindow::on_menu_vpn_settings_triggered()

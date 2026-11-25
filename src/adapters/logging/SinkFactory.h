@@ -17,6 +17,9 @@ namespace app::adapters{
 // 由 LogConfigSection 填充；级别用字符串（"trace".."off"）与 UI/JSON 一致
 struct LogSinkSpec
     {
+    bool console_enabled = true;
+    std::string console_level = "info";
+
     bool ui_enabled = true;
     std::string ui_level = "info";
 
@@ -25,6 +28,10 @@ struct LogSinkSpec
     std::string file_path = "logs/app.log";
     std::int64_t file_max_size_mb = 5;
     std::int64_t file_rotate_count = 3;
+
+    // flush 策略：达到该级别即落盘（"off" = 不主动刷新）；>0 时每 N 秒周期刷新
+    std::string flush_level = "info";
+    std::int64_t flush_every_sec = 0;
 
     std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%l] [%s:%#] %v";
     };

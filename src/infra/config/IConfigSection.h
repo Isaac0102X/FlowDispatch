@@ -25,6 +25,7 @@ class IConfigSection
         virtual void save_to(IConfigStore &store) const = 0;
 
         // 给 UI 弹框的表单；不同弹框按 id 取不同段，触发点彼此独立
+        //TODO: 这个函数好像没用，待删除
         virtual std::vector<UiField> ui_fields() const = 0;
         // 用户确认后：校验 → 更新强类型 → 持久化 → 通知业务热更新
         virtual void apply(const FieldMap &edits, IConfigStore &store) = 0;

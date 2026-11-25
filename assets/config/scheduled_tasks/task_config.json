@@ -1,0 +1,5 @@
+{
+  "cron_expr": "0 * * * *",
+  "retry_count": 3,
+  "enabled": true
+}

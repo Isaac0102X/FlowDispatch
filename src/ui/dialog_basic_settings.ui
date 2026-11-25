@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>654</width>
-    <height>400</height>
+    <width>669</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -654,8 +654,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>624</width>
-            <height>299</height>
+            <width>629</width>
+            <height>301</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -757,6 +757,9 @@
          </item>
          <item>
           <widget class="QComboBox" name="uiLogLevel">
+           <property name="currentIndex">
+            <number>2</number>
+           </property>
            <item>
             <property name="text">
              <string>Trace</string>
@@ -792,9 +795,6 @@
              <string>Off</string>
             </property>
            </item>
-           <property name="currentIndex">
-            <number>2</number>
-           </property>
           </widget>
          </item>
          <item>
@@ -833,6 +833,9 @@
          </item>
          <item>
           <widget class="QComboBox" name="textLogLevel">
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
            <item>
             <property name="text">
              <string>Trace</string>
@@ -868,9 +871,6 @@
              <string>Off</string>
             </property>
            </item>
-           <property name="currentIndex">
-            <number>1</number>
-           </property>
           </widget>
          </item>
          <item>
@@ -902,6 +902,9 @@
          </item>
          <item>
           <widget class="QSpinBox" name="logFileSize">
+           <property name="suffix">
+            <string> MB</string>
+           </property>
            <property name="minimum">
             <number>1</number>
            </property>
@@ -910,9 +913,6 @@
            </property>
            <property name="value">
             <number>5</number>
-           </property>
-           <property name="suffix">
-            <string> MB</string>
            </property>
           </widget>
          </item>
@@ -958,6 +958,115 @@
          </item>
          <item>
           <spacer name="logRetainedCountSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="flushLevelLayout">
+         <property name="leftMargin">
+          <number>24</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="flushLevelLabel">
+           <property name="text">
+            <string>Flush Level</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="flushLevel">
+           <item>
+            <property name="text">
+             <string>trace</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>debug</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>info</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>warn</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>err</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>critical</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>off</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="flushLevelSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="flushPeriodLayout">
+         <property name="leftMargin">
+          <number>24</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="flushPeriodLabel">
+           <property name="text">
+            <string>Flush Period</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="flushPeriod">
+           <property name="suffix">
+            <string> sec (0=disabled)</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>3600</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="flushPeriodSpacer">
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>

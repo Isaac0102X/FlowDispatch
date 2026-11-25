@@ -12,6 +12,6 @@ int main(int argc, char **argv)
 
     QApplication app(argc, argv);
 
-    app::bootstrap::Bootstrapper bootstrapper;
+    app::assembly::Bootstrapper bootstrapper;
     return bootstrapper.run();
     }

@@ -92,7 +92,28 @@ std::shared_ptr<spdlog::logger> SinkFactory::create(const LogSinkSpec &spec,
     // 总闸放最松，是否输出由各 sink 自己的级别过滤
     logger->set_level(spdlog::level::trace);
     logger->set_pattern(spec.pattern);
-    logger->flush_on(spdlog::level::warn);
+    logger->flush_on(level_of(spec.flush_level));
+    // 周期刷新：spdlog::flush_every 只对"注册进全局 registry"的 logger 生效，
+    // 我们不用 registry 默认 logger，需显式注册（drop
+    // 保证重建/关闭周期刷新时幂等）。
+    if (const auto existing = spdlog::get("app"); existing)
+        {
+        spdlog::drop("app");
+        }
+    if (spec.flush_every_sec > 0)
+        {
+        spdlog::register_logger(logger);
+        spdlog::flush_every(std::chrono::seconds(spec.flush_every_sec));
+        }
+    else
+        {
+        spdlog::flush_every(std::chrono::seconds(0)); // 0 = 停止周期刷新
+        }
+    // 写失败（如 stdout 管道断裂 EPIPE）不致命：忽略，避免 spdlog 默认 error
+    // handler 抛异常终止
+    logger->set_error_handler([](const std::string &)
+        {
+        });
     return logger;
     }
 

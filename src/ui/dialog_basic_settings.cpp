@@ -13,7 +13,7 @@
 #include <QStyleFactory>
 #include <QTimer>
 
-using namespace app::core;
+using namespace app::cfg_management;
 using namespace app::infra::config;
 
 class ExtraCoreWidget : public QWidget
@@ -62,8 +62,10 @@ public:
     };
 
 DialogBasicSettings::DialogBasicSettings(
-    LogConfigSection &section, IConfigStore &store, QWidget *parent)
-    : QDialog(parent), section_(section), store_(store),
+    LogConfigSection &section,
+    app::cfg_management::BasicSettings::CommonSection &common,
+    IConfigStore &store, QWidget *parent)
+    : QDialog(parent), section_(section), common_(common), store_(store),
       ui(new Ui::DialogBasicSettings)
     {
     ui->setupUi(this);
@@ -71,6 +73,7 @@ DialogBasicSettings::DialogBasicSettings(
         QStringLiteral("trace debug info warn error fatal panic").split(" "));
     ui->mux_protocol->addItems({"h2mux", "smux", "yamux"});
 
+    load_common_settings();
     load_log_settings();
 
     refresh_auth();
@@ -82,6 +85,25 @@ DialogBasicSettings::DialogBasicSettings(
     ui->connection_statistics_box->setDisabled(true);
     //把Qt所有可用的QStyle名称（如 Fusion、windowsvista 等，随平台和插件而变）填入主题下拉框，供用户切换程序外观风格。
     ui->theme->addItems(QStyleFactory::keys());
+    }
+
+void DialogBasicSettings::load_common_settings()
+    {
+    const auto &settings = common_.data();
+    ui->inbound_address->setText(
+        QString::fromStdString(settings.inbound_address));
+    ui->inbound_socks_port->setText(
+        QString::number(settings.inbound_socks_port));
+    ui->test_latency_url->setText(
+        QString::fromStdString(settings.test_latency_url));
+    ui->test_concurrent->setText(
+        QString::number(settings.test_concurrent));
+    ui->test_download_url->setText(
+        QString::fromStdString(settings.test_download_url));
+    ui->test_download_timeout->setText(
+        QString::number(settings.test_download_timeout));
+    ui->check_include_pre->setChecked(settings.check_include_pre);
+    ui->old_share_link_format->setChecked(settings.old_share_link_format);
     }
 
 void DialogBasicSettings::load_log_settings()
@@ -112,6 +134,9 @@ void DialogBasicSettings::load_log_settings()
         };
     select_log_level(ui->uiLogLevel, settings.ui_level);
     select_log_level(ui->textLogLevel, settings.file_level);
+    select_log_level(ui->flushLevel, settings.flush_level);
+    ui->flushPeriod->setValue(
+        static_cast<int>(settings.flush_every_sec));
     }
 
 DialogBasicSettings::~DialogBasicSettings()
@@ -128,12 +153,34 @@ FieldMap DialogBasicSettings::collect() const
     m["file_level"] = ui->textLogLevel->currentText().toLower().toStdString();
     m["file_max_size_mb"] = static_cast<std::int64_t>(ui->logFileSize->value());
     m["file_rotate_count"] = static_cast<std::int64_t>(ui->logRetainedCount->value());
+    m["flush_level"] = ui->flushLevel->currentText().toLower().toStdString();
+    m["flush_every_sec"] =
+        static_cast<std::int64_t>(ui->flushPeriod->value());
     return m;
     }
 
 void DialogBasicSettings::accept()
     {
     section_.apply(collect(), store_);
+
+    app::infra::config::FieldMap common_edits;
+    common_edits["inbound_address"] =
+        ui->inbound_address->text().toStdString();
+    common_edits["inbound_socks_port"] =
+        static_cast<std::int64_t>(ui->inbound_socks_port->text().toLongLong());
+    common_edits["test_latency_url"] =
+        ui->test_latency_url->text().toStdString();
+    common_edits["test_concurrent"] =
+        static_cast<std::int64_t>(ui->test_concurrent->text().toLongLong());
+    common_edits["test_download_url"] =
+        ui->test_download_url->text().toStdString();
+    common_edits["test_download_timeout"] =
+        static_cast<std::int64_t>(ui->test_download_timeout->text().toLongLong());
+    common_edits["check_include_pre"] = ui->check_include_pre->isChecked();
+    common_edits["old_share_link_format"] =
+        ui->old_share_link_format->isChecked();
+    common_.apply(common_edits, store_);
+
     QDialog::accept();
     }
 

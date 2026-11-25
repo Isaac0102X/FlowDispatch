@@ -1,17 +1,9 @@
-// JsonConfigStore.h — nlohmann/json 的适配器（适配层，业务不可见）。
-// 管理"配置目录"下按 section 分文件/分文件夹的 json：
-//   Config/app.json                          （应用级设置）
-//   Config/log.json                          （日志设置）
-//   Config/node_management/node_config.json  （业务：节点管理）
-//   Config/scheduled_tasks/task_config.json  （业务：定时任务）
-// section id 直接作为相对路径（自动补 .json），因此 id 可以含 '/'
-// 表示子文件夹。
+
 #pragma once
 
 #include "infra/config/IConfigStore.h"
 
 #include <filesystem>
-#include <memory>
 #include <mutex>
 
 namespace app::adapters{
@@ -19,24 +11,38 @@ namespace app::adapters{
 class JsonConfigStore final : public app::infra::config::IConfigStore
     {
 public:
-    explicit JsonConfigStore(std::filesystem::path root_dir);
+    // config_dir：配置根目录（绿色版为 <exe目录>/Config）
+    explicit JsonConfigStore(std::filesystem::path config_dir);
     ~JsonConfigStore() override;
     JsonConfigStore(const JsonConfigStore &) = delete;
     JsonConfigStore &operator=(const JsonConfigStore &) = delete;
 
+    // 读取：模板（低优先级）+ 用户配置（高优先级）按字段合并
     app::infra::config::FieldMap load(std::string_view section) const override;
+
+    // 写回：只写用户文件，保留未知字段，原子替换
     void save(std::string_view section,
-              const app::infra::config::FieldMap &fields) override;
-    // 目录式存储：save 即落盘，flush 为空操作
+        const app::infra::config::FieldMap &fields) override;
+
+    // 用户配置文件（*.json）是否已存在；出厂模板不算
+    bool exists(std::string_view section) const override;
+
+    // 目录式存储：save 已即时落盘，flush 无需额外动作
     void flush() override {}
 
+    // 配置根目录（供启动日志展示，便于用户/支持人员确认读的是哪份配置）
+    const std::filesystem::path &root_dir() const noexcept { return root_dir_; }
+
 private:
-    // section 形如 "scheduled_tasks/task_config" ->
-    // <root>/scheduled_tasks/task_config.json
-    std::filesystem::path file_for(std::string_view section) const;
+    // <root>/<section>.json —— 用户配置
+    std::filesystem::path user_file(std::string_view section) const;
+    // <root>/<section>.default.json —— 出厂模板
+    std::filesystem::path template_file(std::string_view section) const;
+    // 由 section 拼出 "<root>/<section>" 的公共部分（不含扩展名）
+    std::filesystem::path section_base(std::string_view section) const;
 
     std::filesystem::path root_dir_;
-    mutable std::mutex mutex_;
+    mutable std::mutex mutex_; // 配置读写是低频操作，一把互斥锁足够，简单可靠
     };
 
 } // namespace app::adapters

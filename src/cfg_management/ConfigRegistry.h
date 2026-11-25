@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-namespace app::core {
+namespace app::cfg_management {
 
 class ConfigRegistry
     {
@@ -25,6 +25,8 @@ class ConfigRegistry
         void load_all(const app::infra::config::IConfigStore &store);
         void save_all(app::infra::config::IConfigStore &store);
 
+        void save_missing(app::infra::config::IConfigStore &store);
+
         std::vector<std::string_view> ids() const;
 
     private:
@@ -32,4 +34,4 @@ class ConfigRegistry
             sections_;
     };
 
-} // namespace app::core
+} // namespace app::cfg_management

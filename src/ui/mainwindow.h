@@ -8,9 +8,9 @@
 #include <QSystemTrayIcon>
 #include <QPoint>
 
-#include "Qt/NekoUtility.hpp"
+#include "NekoUtility.hpp"
 
-#include "core/AppContext.h"
+#include "bootstrap/AppContext.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,7 +25,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        explicit MainWindow(app::core::AppContext &ctx, QWidget *parent = nullptr);
+        explicit MainWindow(app::cfg_management::AppContext &ctx, QWidget *parent = nullptr);
 
         ~MainWindow() override;
 
@@ -71,7 +71,7 @@ class MainWindow : public QMainWindow
         QSystemTrayIcon *tray_;
         int icon_status_ = -1;
 
-        app::core::AppContext& ctx_;
+        app::cfg_management::AppContext& ctx_;
 
         void closeEvent(QCloseEvent *event) override;
 

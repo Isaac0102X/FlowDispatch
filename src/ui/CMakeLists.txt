@@ -9,10 +9,10 @@ set(PROJECT_SOURCES
         # ---- 编辑对话框 ----
         # edit/dialog_edit_profile.h
         # edit/dialog_edit_profile.cpp
-        # edit/dialog_edit_profile.ui
-        # edit/dialog_edit_group.h
-        # edit/dialog_edit_group.cpp
-        # edit/dialog_edit_group.ui
+        #edit/dialog_edit_profile.ui
+        edit/dialog_edit_group.h
+        edit/dialog_edit_group.cpp
+        edit/dialog_edit_group.ui
 
         # edit/edit_chain.h
         # edit/edit_chain.cpp
@@ -86,11 +86,10 @@ set_property(TARGET app_ui PROPERTY AUTORCC ON)
 target_link_libraries(app_ui PUBLIC
     app_adapter_qt
     app_business
-    app_core
+    app_cfg_management
     app_infra
     Qt6::Widgets
     Qt6::Network
     Qt6::Svg
 )
-
 

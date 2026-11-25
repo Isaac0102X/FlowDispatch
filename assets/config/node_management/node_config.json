@@ -1,0 +1,6 @@
+{
+  "timeout": 3,
+  "sync_interval": 5,
+  "auto_sync": false,
+  "endpoint": "localhost:8080",
+}

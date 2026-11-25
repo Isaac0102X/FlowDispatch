@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-namespace app::core{
+namespace app::cfg_management{
 
 struct LogSettings
     {
@@ -22,6 +22,10 @@ struct LogSettings
     std::string file_path = "logs/app.log";
     std::int64_t file_max_size_mb = 5;
     std::int64_t file_rotate_count = 3;
+    // flush 策略：达到该级别即落盘（off = 不主动刷新）；flush_every_sec > 0
+    // 时每 N 秒周期刷新
+    std::string flush_level = "info";
+    std::int64_t flush_every_sec = 0;
     };
 
 class LogConfigSection final : public app::infra::config::IConfigSection
@@ -42,4 +46,4 @@ private:
     LogSettings data_;
     };
 
-    } // namespace app::core
+    } // namespace app::cfg_management
